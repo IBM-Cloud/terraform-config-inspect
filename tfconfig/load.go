@@ -176,7 +176,7 @@ func findSubModuleSourcePath(source string) string {
 	return ""
 }
 
-//findVariableMetadataFromModule:
+// findVariableMetadataFromModule:
 // dir -->template file directory and metadataPath
 // modules --> modules details from Module struct, variables --> variables from module struct and metadata json as inputs
 // This function first checks for downloaded modules of terraform init under /.terraform/modules/  directory
@@ -209,12 +209,12 @@ func findVariableMetadataFromModule(dir, metadataPath string, fileStruct map[str
 					modulePath = modulePath + "/" + subModuleDirectorySource
 				}
 			} else {
-				err = append(err, Diagnostic{
-					Severity: DiagError,
-					Summary:  "module path error",
-					Detail:   fmt.Sprintf("module source %s is either incorrect or not supported by this tool", module.Source),
-				})
-				return err
+				for key := range fileStruct {
+					if strings.Contains(key, module.Name) {
+						modulePath = "./.terraform/modules/" + key
+						break
+					}
+				}
 			}
 			log.Printf("[INFO] Loading module '%s' from the path '%s'", module.Name, modulePath)
 			// Load inner module
@@ -389,14 +389,15 @@ func findOutputMetadataFromResourceOrDatasource(outputs map[string]*Output, vari
 }
 
 // Name           string        `json:"name"`
-// 	Description    string        `json:"description,omitempty"`
-// 	Value          string        `json:"value,omitempty"`
-// 	Sensitive      bool          `json:"sensitive,omitempty"`
-// 	Pos            *SourcePos    `json:"pos,omitempty"`
-// 	Type           string        `json:"type,omitempty"`
-// 	Source         []string      `json:"source,omitempty"`
-// 	CloudDataType  string        `json:"cloud_data_type,omitempty" description:"Cloud data type of the variable. eg. resource_group_id, region, vpc_id."`
-// 	CloudDataRange []interface{} `json:"cloud_data_range,omitempty" description:""`
+//
+//	Description    string        `json:"description,omitempty"`
+//	Value          string        `json:"value,omitempty"`
+//	Sensitive      bool          `json:"sensitive,omitempty"`
+//	Pos            *SourcePos    `json:"pos,omitempty"`
+//	Type           string        `json:"type,omitempty"`
+//	Source         []string      `json:"source,omitempty"`
+//	CloudDataType  string        `json:"cloud_data_type,omitempty" description:"Cloud data type of the variable. eg. resource_group_id, region, vpc_id."`
+//	CloudDataRange []interface{} `json:"cloud_data_range,omitempty" description:""`
 func ExtractOutputMetadata(o *Output, m interface{}, moduleName, moduleAttribute string) {
 
 	if ma, ok := m.(map[string]interface{})[moduleName]; ok {
